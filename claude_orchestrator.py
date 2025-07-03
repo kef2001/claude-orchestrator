@@ -1585,10 +1585,17 @@ class ClaudeOrchestrator:
                 
                 task_results = []
                 for task_id, task in self.manager.completed_tasks.items():
+                    # Include both task result and review status
+                    summary_parts = []
+                    if task.result:
+                        summary_parts.append(task.result)
+                    if task.status_message:
+                        summary_parts.append(f"[{task.status_message}]")
+                    
                     task_results.append({
                         'status': 'completed',
                         'title': task.title,
-                        'summary': task.status_message or "No review status"
+                        'summary': " ".join(summary_parts) if summary_parts else "Task completed"
                     })
                 
                 elapsed_time = elapsed_str if 'elapsed_str' in locals() else "Unknown"
