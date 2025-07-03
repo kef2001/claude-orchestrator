@@ -11,13 +11,13 @@
   },
   "execution": {
     "max_workers": 3,
-    "worker_timeout": 5600,
-    "manager_timeout": 2800,
+    "worker_timeout": 7200,
+    "manager_timeout": 7200,
     "task_queue_timeout": 1.0,
     "max_turns": null,
     "default_working_dir": "/Users/mediquitous/workspace/claude_automation2",
-    "bash_default_timeout_ms": 3600000,
-    "bash_max_timeout_ms": 7200000,
+    "bash_default_timeout_ms": 36000000,
+    "bash_max_timeout_ms": 72000000,
     "bash_max_output_length": 30000,
     "max_retries": 3,
     "retry_base_delay": 1.0,
@@ -47,5 +47,9 @@
   "git": {
     "auto_commit": false,
     "commit_message_prefix": "🤖 Auto-commit by Claude Orchestrator"
+  },
+  "locale": {
+    "language": "ko",
+    "description": "Language for commit messages and outputs (ko=Korean, en=English, ja=Japanese, zh=Chinese)"
   }
 }
