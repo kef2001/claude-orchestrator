@@ -1914,18 +1914,37 @@ def opus_add_task(description: str, config) -> bool:
         prompt = f"""You are a project manager using Task Master. 
 A user wants to add this task: "{description}"
 
-Analyze this request and use the task-master CLI to:
-1. Add the task with appropriate details
-2. If it's complex, expand it into subtasks
-3. Set appropriate priority and dependencies if needed
+CRITICAL ANALYSIS REQUIRED:
+1. Analyze the task to identify INDEPENDENT components that can be worked on in PARALLEL
+2. Consider the scope and impact area of each component
+3. Create SEPARATE tasks for work that affects different files, modules, or features
 
-IMPORTANT: When using task-master add-task command, make sure to escape any newlines in the prompt by replacing them with \\n
+GUIDELINES FOR TASK SEPARATION:
+- If the task involves multiple features → Create separate tasks for each feature
+- If the task affects different files/modules → Create separate tasks for each module
+- If parts can be developed independently → Create separate parallel tasks
+- Only create dependencies when one task MUST complete before another can start
 
-Use these commands as needed:
-- task-master add-task --prompt="..." --research
-- task-master expand --id=<id> --research
+EXAMPLE:
+Instead of: "Implement authentication system"
+Create multiple tasks:
+- "Create user model and database schema"
+- "Implement JWT token generation"
+- "Create login API endpoint"
+- "Create registration API endpoint"
+- "Add authentication middleware"
+- "Create user profile endpoints"
 
-Start by adding the main task, then expand if necessary."""
+These can mostly run in parallel, maximizing efficiency!
+
+Use these commands:
+- task-master add-task --prompt="[specific component]" --priority=[high/medium/low]
+- For truly complex tasks: task-master expand --id=<id> --research
+
+IMPORTANT: 
+- Escape newlines in prompts with \\n
+- Create multiple focused tasks rather than one large task
+- Think about what can be done simultaneously by different workers"""
 
         # Execute Opus command
         with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
@@ -2029,17 +2048,40 @@ Contents:
 {file_contents}
 ---
 
-Please analyze this document and:
-1. If it's a PRD (Product Requirements Document), use: task-master parse-prd "{file_path}"
-2. If it contains multiple separate tasks, add each one individually using: task-master add-task --prompt="..." --research
-3. For complex tasks, expand them using: task-master expand --id=<id> --research
-4. Set appropriate priorities and dependencies
+CRITICAL: MAXIMIZE PARALLEL EXECUTION
+When analyzing this document:
+1. Identify all INDEPENDENT work items that can be done in PARALLEL
+2. Create SEPARATE tasks for each component that can be worked on simultaneously
+3. Only add dependencies when absolutely necessary (one task MUST complete before another)
 
-Important: 
-- Use the actual file path provided: {file_path}
-- Execute the appropriate task-master commands to add all tasks from this document
-- If it's a proper PRD format, prefer using parse-prd command
-- Otherwise, extract and add individual tasks"""
+TASK SEPARATION STRATEGY:
+- Different features/modules → Separate tasks
+- Different files affected → Separate tasks  
+- Frontend vs Backend → Separate tasks
+- Database vs API → Separate tasks
+- Documentation vs Code → Separate tasks
+
+EXAMPLE BREAKDOWN:
+"Build a user management system" should become:
+- "Design and create user database schema"
+- "Implement user model and ORM mappings"
+- "Create user registration API endpoint"
+- "Create user login API endpoint"
+- "Create user profile API endpoints"
+- "Build frontend registration form"
+- "Build frontend login form"
+- "Add user authentication middleware"
+- "Write API documentation"
+- "Create unit tests for user endpoints"
+
+Most of these can run in parallel!
+
+COMMANDS TO USE:
+1. If it's a PRD format: task-master parse-prd "{file_path}"
+2. For individual tasks: task-master add-task --prompt="[specific component]" --priority=[high/medium/low]
+3. Only use expand for truly complex single components
+
+Remember: More parallel tasks = faster completion!"""
 
         # Execute Opus command
         with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
@@ -2414,6 +2456,32 @@ def init_orchestrator(config) -> bool:
             f.write("PERPLEXITY_API_KEY=your_perplexity_api_key_here  # Optional\n")
             f.write("SLACK_WEBHOOK_URL=your_slack_webhook_url_here   # Optional\n")
         print("✅ Created .env.example")
+    
+    # Create co shortcut if it doesn't exist
+    if not os.path.exists("co"):
+        print("\n🔧 Creating 'co' shortcut...")
+        co_content = '''#!/usr/bin/env python3
+"""
+Claude Orchestrator shortcut command
+"""
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from claude_orchestrator import main
+
+if __name__ == "__main__":
+    main()'''
+        
+        with open("co", 'w') as f:
+            f.write(co_content)
+        
+        # Make it executable
+        import stat
+        st = os.stat('co')
+        os.chmod('co', st.st_mode | stat.S_IEXEC)
+        
+        print("✅ Created 'co' shortcut command")
+        print("   You can now use './co' instead of 'python claude_orchestrator.py'")
     
     print("\n✅ Orchestrator initialization complete!")
     print("\nNext steps:")

@@ -551,6 +551,10 @@ class EnhancedConfig:
     claude_settings = ConfigProperty("claude_cli.settings", {})
     claude_environment = ConfigProperty("claude_cli.environment", {})
     
+    # Git configurations
+    git_auto_commit = ConfigProperty("git.auto_commit", False)
+    git_commit_prefix = ConfigProperty("git.commit_message_prefix", "🤖 Auto-commit by Claude Orchestrator")
+    
     def refresh(self):
         """Refresh configuration from sources"""
         self.config = self.config_manager.load_configuration()
