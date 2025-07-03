@@ -1,0 +1,48 @@
+{
+  "models": {
+    "manager": {
+      "model": "opus",
+      "description": "Opus model for planning and task management"
+    },
+    "worker": {
+      "model": "sonnet",
+      "description": "Sonnet model for code implementation"
+    }
+  },
+  "execution": {
+    "max_workers": 3,
+    "worker_timeout": 300,
+    "manager_timeout": 180,
+    "task_queue_timeout": 1.0,
+    "max_turns": null,
+    "default_working_dir": "/Users/mediquitous/workspace/claude_automation2",
+    "bash_default_timeout_ms": 120000,
+    "bash_max_timeout_ms": 600000,
+    "bash_max_output_length": 30000
+  },
+  "monitoring": {
+    "progress_interval": 10,
+    "verbose_logging": false,
+    "show_progress_bar": true,
+    "enable_opus_review": true
+  },
+  "claude_cli": {
+    "command": "claude",
+    "flags": {
+      "verbose": false,
+      "dangerously_skip_permissions": false
+    },
+    "settings": {},
+    "environment": {}
+  },
+  "notifications": {
+    "slack_webhook_url": null,
+    "notify_on_task_complete": true,
+    "notify_on_task_failed": true,
+    "notify_on_all_complete": true
+  },
+  "git": {
+    "auto_commit": false,
+    "commit_message_prefix": "🤖 Auto-commit by Claude Orchestrator"
+  }
+}
