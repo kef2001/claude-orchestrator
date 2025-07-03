@@ -11,14 +11,17 @@
   },
   "execution": {
     "max_workers": 3,
-    "worker_timeout": 300,
-    "manager_timeout": 180,
+    "worker_timeout": 5600,
+    "manager_timeout": 2800,
     "task_queue_timeout": 1.0,
     "max_turns": null,
     "default_working_dir": "/Users/mediquitous/workspace/claude_automation2",
-    "bash_default_timeout_ms": 120000,
-    "bash_max_timeout_ms": 600000,
-    "bash_max_output_length": 30000
+    "bash_default_timeout_ms": 3600000,
+    "bash_max_timeout_ms": 7200000,
+    "bash_max_output_length": 30000,
+    "max_retries": 3,
+    "retry_base_delay": 1.0,
+    "retry_max_delay": 60.0
   },
   "monitoring": {
     "progress_interval": 10,

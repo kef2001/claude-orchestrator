@@ -101,11 +101,28 @@ In orchestrator_config.json:
 
 ### Error Handling
 
-The orchestrator includes:
-- Automatic retries for failed tasks
-- Session usage monitoring to prevent limit exceeded errors
-- Detailed error logging and progress tracking
-- Graceful shutdown on interruption
+The orchestrator includes comprehensive error handling:
+- **HTTP Error Recognition**: Handles all standard API error codes (400, 401, 403, 404, 413, 429, 500, 529)
+- **Automatic Retries**: Intelligent retry logic for transient errors (429 rate limit, 529 overloaded, 500 server errors)
+  - Exponential backoff with jitter
+  - Configurable max retries (default: 3)
+  - Respects server-provided retry-after headers
+- **Request ID Tracking**: Logs request IDs for debugging with Anthropic support
+- **Streaming Error Support**: Handles errors that occur during SSE streaming
+- **Session Usage Monitoring**: Prevents limit exceeded errors
+- **Detailed Error Logging**: Clear error messages with context
+- **Graceful Shutdown**: Clean handling of interruptions
+
+#### Retry Configuration
+
+In orchestrator_config.json:
+```json
+"execution": {
+  "max_retries": 3,
+  "retry_base_delay": 1.0,
+  "retry_max_delay": 60.0
+}
+```
 
 ## Important Notes
 

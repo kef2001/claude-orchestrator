@@ -32,6 +32,14 @@ except ImportError:
     CONFIG_MANAGER_AVAILABLE = False
     print("⚠️ Enhanced configuration manager not available. Install requirements: pip install -r requirements.txt")
 
+# Import error handling
+try:
+    from claude_error_handler import ClaudeErrorHandler, ClaudeError
+    ERROR_HANDLER_AVAILABLE = True
+except ImportError:
+    ERROR_HANDLER_AVAILABLE = False
+    logger.warning("Claude error handler not available")
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -852,6 +860,16 @@ class SonnetWorker:
         self.session_tokens_used = 0
         self.session_start_time = time.time()
         self.tasks_completed = 0
+        
+        # Initialize error handler
+        self.error_handler = None
+        if ERROR_HANDLER_AVAILABLE:
+            self.error_handler = ClaudeErrorHandler(
+                max_retries=getattr(config, 'max_retries', 3),
+                base_delay=getattr(config, 'retry_base_delay', 1.0),
+                max_delay=getattr(config, 'retry_max_delay', 60.0)
+            )
+        
         logger.info(f"Worker {worker_id} initialized in {working_dir}")
     
     def process_task(self, task: WorkerTask) -> WorkerTask:
@@ -866,7 +884,7 @@ class SonnetWorker:
             # Create a prompt for Claude
             prompt = self._create_claude_prompt(task)
             
-            # Execute Claude command
+            # Execute Claude command (will use retry logic if error handler is available)
             result = self._execute_claude_command(prompt)
             
             if result['success']:
@@ -901,6 +919,10 @@ class SonnetWorker:
                     task.error = "USAGE_LIMIT_REACHED"
                 else:
                     logger.error(f"Worker {self.worker_id}: Failed task {task.task_id} - {result['error']}")
+                
+                # Log request ID if available
+                if 'request_id' in result and result['request_id']:
+                    logger.error(f"Request ID for debugging: {result['request_id']}")
             
         except Exception as e:
             task.status = TaskStatus.FAILED
@@ -926,6 +948,15 @@ class SonnetWorker:
         return "\n".join(prompt_parts)
     
     def _execute_claude_command(self, prompt: str) -> Dict[str, Any]:
+        """Wrapper for executing Claude command - uses error handler if available"""
+        if self.error_handler:
+            return self.error_handler.execute_with_retry(
+                self._execute_claude_command_internal, prompt
+            )
+        else:
+            return self._execute_claude_command_internal(prompt)
+    
+    def _execute_claude_command_internal(self, prompt: str) -> Dict[str, Any]:
         """Execute Claude CLI command with the given prompt"""
         try:
             # First check if Claude CLI is available and authenticated
@@ -1039,18 +1070,21 @@ class SonnetWorker:
                     
                 return {
                     'success': False,
-                    'error': error_msg
+                    'error': error_msg,
+                    'return_code': result.returncode
                 }
             
         except subprocess.TimeoutExpired:
             return {
                 'success': False,
-                'error': f"Command timed out after {self.config.worker_timeout} seconds"
+                'error': f"Command timed out after {self.config.worker_timeout} seconds",
+                'return_code': -1
             }
         except Exception as e:
             return {
                 'success': False,
-                'error': str(e)
+                'error': str(e),
+                'return_code': -1
             }
     
     def _extract_usage_info(self, output: str) -> Dict[str, Any]:
