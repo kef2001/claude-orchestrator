@@ -393,12 +393,570 @@
             "testStrategy": "Test continuous monitoring behavior, verify graceful shutdown, validate configuration loading, and ensure proper task discovery and execution in keep-alive mode"
           }
         ]
+      },
+      {
+        "id": 7,
+        "title": "Implement a comprehensive testing framework for the Claude Orchestrator system",
+        "description": "Create a robust testing framework for the Claude Orchestrator system that includes unit tests, integration tests, and end-to-end tests to ensure reliability and maintainability of all orchestrator components.",
+        "details": "Build a comprehensive testing framework for the Claude Orchestrator system with the following components:\n\n1. **Testing Infrastructure Setup**:\n   - Install and configure pytest as the primary testing framework\n   - Set up pytest-cov for code coverage reporting\n   - Configure pytest-mock for mocking external dependencies\n   - Create a tests/ directory structure with subdirectories for unit, integration, and e2e tests\n   - Add test configuration files (pytest.ini, .coveragerc)\n\n2. **Unit Tests for Core Components**:\n   - Test claude_orchestrator.py main functions and command parsing\n   - Test task_master.py including task distribution and worker management\n   - Test configuration loading and validation from orchestrator_config.json\n   - Test error handling and edge cases for all major functions\n   - Implement fixtures for common test data and mock objects\n\n3. **Integration Tests**:\n   - Test the interaction between Task Master and Worker processes\n   - Verify proper task queue management and result collection\n   - Test configuration discovery and loading from multiple sources\n   - Validate the review process between Opus and Sonnet models\n   - Test keep-alive monitoring functionality\n\n4. **End-to-End Tests**:\n   - Create test scenarios that simulate real orchestrator workflows\n   - Test complete task execution from initialization to completion\n   - Verify proper handling of multiple concurrent tasks\n   - Test failure scenarios and recovery mechanisms\n   - Validate output formats and logging behavior\n\n5. **Mock Services and Test Utilities**:\n   - Create mock Claude API responses for testing without real API calls\n   - Implement test helpers for common operations\n   - Build factories for generating test data\n   - Create utilities for capturing and asserting on log output\n\n6. **Continuous Integration Setup**:\n   - Create test runner scripts for different test suites\n   - Add pre-commit hooks for running tests before commits\n   - Configure GitHub Actions or similar CI for automated testing\n   - Set up coverage thresholds and reporting",
+        "testStrategy": "1. **Verify Testing Framework Installation**:\n   - Run `pytest --version` to confirm pytest is installed\n   - Execute `pytest --cov` to verify coverage plugin works\n   - Check that all test dependencies are in requirements-test.txt\n\n2. **Unit Test Validation**:\n   - Run `pytest tests/unit/` and ensure all unit tests pass\n   - Verify at least 80% code coverage for core modules\n   - Check that each public function has at least one test\n   - Confirm edge cases and error conditions are tested\n\n3. **Integration Test Execution**:\n   - Run `pytest tests/integration/` with all tests passing\n   - Verify tests properly mock external dependencies\n   - Check that task distribution tests cover multiple worker scenarios\n   - Ensure configuration discovery tests work with various file structures\n\n4. **End-to-End Test Verification**:\n   - Execute `pytest tests/e2e/` and confirm realistic scenarios pass\n   - Verify tests complete within reasonable time limits\n   - Check that failure injection tests properly validate error handling\n   - Ensure all major orchestrator commands have e2e coverage\n\n5. **Coverage and Quality Metrics**:\n   - Run `pytest --cov=. --cov-report=html` and review coverage report\n   - Achieve minimum 80% overall code coverage\n   - Ensure no critical paths have less than 90% coverage\n   - Verify all error handling code is covered by tests\n\n6. **CI/CD Integration**:\n   - Push code and verify CI pipeline runs all tests automatically\n   - Confirm test results are reported in pull requests\n   - Check that failing tests block merges appropriately\n   - Verify coverage reports are generated and accessible",
+        "status": "pending",
+        "dependencies": [
+          5,
+          6,
+          "4"
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up testing infrastructure and configuration",
+            "description": "Install and configure pytest framework with coverage reporting and create the base test directory structure",
+            "dependencies": [],
+            "details": "Install pytest, pytest-cov, and pytest-mock packages. Create tests/ directory with subdirectories for unit/, integration/, and e2e/ tests. Configure pytest.ini with test discovery patterns, coverage settings, and test markers. Set up .coveragerc to exclude non-testable files and define coverage thresholds. Create conftest.py files for shared fixtures and test configuration.",
+            "status": "pending",
+            "testStrategy": "Verify the testing setup by creating a simple smoke test that validates pytest is properly configured and can discover tests across all subdirectories"
+          },
+          {
+            "id": 2,
+            "title": "Implement unit tests for core orchestrator components",
+            "description": "Create comprehensive unit tests for claude_orchestrator.py, task_master.py, and configuration modules",
+            "dependencies": [
+              1
+            ],
+            "details": "Write unit tests for claude_orchestrator.py covering main() function, command-line argument parsing, and initialization logic. Test task_master.py including TaskMaster class methods, worker process management, task distribution algorithms, and result collection. Create tests for configuration loading from orchestrator_config.json with validation of all configuration parameters. Implement error handling tests for invalid inputs, missing files, and API failures. Use pytest fixtures for common test data and mock objects.",
+            "status": "pending",
+            "testStrategy": "Use pytest-mock to isolate each component and mock external dependencies like Claude API calls. Aim for minimum 80% code coverage on core modules"
+          },
+          {
+            "id": 3,
+            "title": "Develop integration tests for component interactions",
+            "description": "Test the interactions between Task Master, Worker processes, and configuration systems",
+            "dependencies": [
+              2
+            ],
+            "details": "Create integration tests that verify Task Master can properly spawn and communicate with Worker processes using multiprocessing queues. Test task distribution across multiple workers and result aggregation. Validate configuration discovery from multiple sources (files, environment variables, command-line args) and proper precedence. Test the review workflow between Opus (reviewer) and Sonnet (implementer) models including feedback loops. Verify keep-alive monitoring detects and handles worker failures correctly.",
+            "status": "pending",
+            "testStrategy": "Use real multiprocessing components but mock the Claude API calls. Create test scenarios with varying numbers of workers and task complexities"
+          },
+          {
+            "id": 4,
+            "title": "Create end-to-end tests and failure scenarios",
+            "description": "Implement comprehensive E2E tests that simulate real orchestrator workflows and test failure recovery",
+            "dependencies": [
+              3
+            ],
+            "details": "Design E2E test scenarios that execute complete orchestrator workflows from task initialization through completion. Test concurrent task execution with multiple workers processing different task types simultaneously. Implement failure scenario tests including worker crashes, API timeouts, invalid task data, and resource exhaustion. Verify recovery mechanisms like task redistribution and graceful degradation. Validate output formats, logging behavior, and result persistence. Test the complete lifecycle of task creation, distribution, execution, review, and completion.",
+            "status": "pending",
+            "testStrategy": "Create a test harness that can simulate various failure conditions and verify the system's resilience and recovery capabilities"
+          },
+          {
+            "id": 5,
+            "title": "Build mock services and CI/CD integration",
+            "description": "Create mock Claude API services, test utilities, and integrate testing into the development workflow",
+            "dependencies": [
+              4
+            ],
+            "details": "Implement a mock Claude API service that returns configurable responses for different model calls (Opus, Sonnet, Haiku). Create test data factories for generating tasks, configurations, and expected results. Build helper utilities for capturing and asserting on log output, process states, and file outputs. Develop test runner scripts for executing different test suites (unit, integration, E2E). Set up pre-commit hooks to run tests and linting before commits. Configure GitHub Actions workflow for automated testing on pull requests with coverage reporting and test result summaries.",
+            "status": "pending",
+            "testStrategy": "Use the mock services in a separate test environment to ensure tests are deterministic and don't consume API credits"
+          },
+          {
+            "id": 6,
+            "title": "Set up GitHub Actions CI/CD pipeline",
+            "description": "Configure GitHub Actions for automated testing and deployment",
+            "details": "<info added on 2025-07-03T11:54:30.333Z>\nSet up branch protection rules to ensure code quality and prevent direct pushes to main branches. Configure automated security scanning using Dependabot to monitor dependencies for known vulnerabilities and automatically create pull requests for security updates. Integrate these security measures into the CI/CD pipeline to ensure all code changes pass security checks before merging.\n</info added on 2025-07-03T11:54:30.333Z>",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 7
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-07-02T09:45:01.280Z",
-      "updated": "2025-07-03T04:47:55.606Z",
+      "updated": "2025-07-03T10:31:58.610Z",
       "description": "Tasks for master context"
+    }
+  },
+  "testing": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Create and execute a basic Hello World Python program",
+        "description": "Develop a simple Python script that prints 'Hello World' to the console and execute it to verify the Python environment is properly configured.",
+        "details": "Create a new Python file named 'hello_world.py' in the project root directory. The script should contain a simple print statement: print('Hello World'). After creating the file, execute it using the Python interpreter to ensure it runs successfully. This task serves as a basic validation that Python is installed and functioning correctly in the development environment.",
+        "testStrategy": "1. Verify that the file 'hello_world.py' exists in the project directory. 2. Check that the file contains valid Python syntax with a print statement. 3. Execute the script using 'python hello_world.py' command and confirm it outputs 'Hello World' to the console. 4. Test with both Python 2 and Python 3 if available to ensure compatibility.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Verify Python installation",
+            "description": "Check that Python is installed on the system and accessible from the command line",
+            "dependencies": [],
+            "details": "Run 'python --version' or 'python3 --version' command to verify Python is installed. Document the installed version number. If Python is not found, this will need to be addressed before proceeding with subsequent tasks.",
+            "status": "done",
+            "testStrategy": "Execute version check command and verify output shows a Python version number (e.g., Python 3.x.x)"
+          },
+          {
+            "id": 2,
+            "title": "Create hello_world.py file",
+            "description": "Create a new Python file named 'hello_world.py' in the project root directory",
+            "dependencies": [],
+            "details": "Use a text editor or IDE to create a new file named 'hello_world.py' in the project root directory. Ensure the file has the correct .py extension and is saved in the proper location.",
+            "status": "done",
+            "testStrategy": "Verify file exists in the project root directory using file system commands (ls, dir) or file explorer"
+          },
+          {
+            "id": 3,
+            "title": "Write Hello World code",
+            "description": "Add the print statement to display 'Hello World' in the hello_world.py file",
+            "dependencies": [
+              2
+            ],
+            "details": "Open hello_world.py and add the following code: print('Hello World'). Save the file after adding the code. Ensure proper syntax with single or double quotes around the string.",
+            "status": "done",
+            "testStrategy": "Open the file and verify it contains the exact code: print('Hello World')"
+          },
+          {
+            "id": 4,
+            "title": "Execute the Python script",
+            "description": "Run the hello_world.py script using the Python interpreter",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Navigate to the project root directory in the terminal/command prompt. Execute the script using 'python hello_world.py' or 'python3 hello_world.py' depending on the system configuration. The output should display 'Hello World' in the console.",
+            "status": "done",
+            "testStrategy": "Run the script and verify 'Hello World' is printed to the console output without any errors"
+          },
+          {
+            "id": 5,
+            "title": "Document execution results",
+            "description": "Record the successful execution and any observations about the Python environment",
+            "dependencies": [
+              4
+            ],
+            "details": "Document that the Python environment is properly configured and working. Note the Python version used, the exact command that successfully ran the script, and confirm that 'Hello World' was displayed as expected. This documentation serves as verification that the development environment is ready for Python development.\n<info added on 2025-07-02T09:51:15.410Z>\nSuccessfully executed hello_world.py using Python 3.13.4 on 2025-07-02. Command 'python3 hello_world.py' produced expected output 'Hello World' without errors. Python environment is properly configured and ready for development.\n</info added on 2025-07-02T09:51:15.410Z>",
+            "status": "done",
+            "testStrategy": "Create a brief log or note confirming successful execution with timestamp and Python version used"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Create a simple calculator program with basic arithmetic operations",
+        "description": "Develop a Python calculator program that performs basic arithmetic operations (addition, subtraction, multiplication, division) with a user-friendly interface and proper error handling.",
+        "details": "Create a Python calculator program that supports the four basic arithmetic operations. The calculator should have a clean, interactive command-line interface that allows users to:\n\n1. Select an operation from a menu (addition, subtraction, multiplication, division)\n2. Input two numbers for the calculation\n3. Display the result clearly\n4. Handle edge cases and errors gracefully\n\nImplementation approach:\n- Create a main calculator.py file\n- Define separate functions for each arithmetic operation\n- Implement a main menu loop that continues until the user chooses to exit\n- Add input validation to ensure numeric inputs\n- Include error handling for division by zero\n- Format output clearly with operation symbols and results\n\nExample structure:\n```python\ndef add(x, y):\n    return x + y\n\ndef subtract(x, y):\n    return x - y\n\ndef multiply(x, y):\n    return x * y\n\ndef divide(x, y):\n    if y == 0:\n        return \"Error: Division by zero\"\n    return x / y\n\ndef main():\n    while True:\n        print(\"\\nSimple Calculator\")\n        print(\"1. Addition\")\n        print(\"2. Subtraction\")\n        print(\"3. Multiplication\")\n        print(\"4. Division\")\n        print(\"5. Exit\")\n        # Implementation continues...\n```",
+        "testStrategy": "1. Test each arithmetic operation with positive numbers (e.g., 10 + 5 = 15, 20 - 8 = 12, 4 * 3 = 12, 15 / 3 = 5)\n2. Test operations with negative numbers (e.g., -5 + 3 = -2, -10 - (-5) = -5)\n3. Test operations with decimal numbers (e.g., 3.5 + 2.5 = 6.0, 10.5 / 2 = 5.25)\n4. Verify division by zero handling - should display error message without crashing\n5. Test invalid input handling - entering non-numeric values should prompt for valid input\n6. Verify menu navigation - selecting option 5 should exit the program cleanly\n7. Test edge cases: very large numbers, very small decimals, zero as operand\n8. Confirm proper formatting of results and clear user prompts\n9. Run the program through multiple calculation cycles to ensure loop stability",
+        "status": "done",
+        "dependencies": [
+          1
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up project structure and define arithmetic functions",
+            "description": "Create calculator.py file and implement the four basic arithmetic operation functions with proper documentation",
+            "dependencies": [],
+            "details": "Create a new Python file named calculator.py. Define four functions: add(x, y), subtract(x, y), multiply(x, y), and divide(x, y). Each function should take two parameters and return the result of the operation. Add docstrings to each function explaining what it does. For the divide function, include a check for division by zero that returns an appropriate error message instead of raising an exception.",
+            "status": "done",
+            "testStrategy": "Test each arithmetic function with positive numbers, negative numbers, zero, and edge cases. Verify division by zero returns error message."
+          },
+          {
+            "id": 2,
+            "title": "Implement input validation and number parsing",
+            "description": "Create helper functions to validate user input and safely convert strings to numbers",
+            "dependencies": [],
+            "details": "Implement a get_number() function that prompts the user for input and validates it's a valid number (integer or float). The function should handle invalid inputs gracefully by catching ValueError exceptions and prompting the user to try again. Create a validate_choice() function to ensure menu selections are within the valid range (1-5). Both functions should use loops to keep prompting until valid input is received.",
+            "status": "done",
+            "testStrategy": "Test input validation with various inputs: valid integers, floats, invalid strings, special characters, and empty inputs."
+          },
+          {
+            "id": 3,
+            "title": "Create interactive menu system",
+            "description": "Build the main menu display and navigation logic for operation selection",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement a display_menu() function that shows the calculator options clearly formatted. Create the main loop structure that displays the menu, gets user choice using the validation function, and routes to the appropriate operation. The menu should include options for all four operations plus an exit option. Use clear formatting with numbered options and consider adding visual separators for better readability.",
+            "status": "done",
+            "testStrategy": "Test menu navigation with all valid choices (1-5) and invalid choices. Verify proper routing to operations."
+          },
+          {
+            "id": 4,
+            "title": "Implement operation execution and result display",
+            "description": "Connect menu choices to arithmetic functions and format output display",
+            "dependencies": [
+              3
+            ],
+            "details": "Create a perform_operation() function that takes the user's choice, prompts for two numbers using the input validation, calls the appropriate arithmetic function, and displays the result in a clear format (e.g., '5 + 3 = 8'). Handle the special case of division by zero by checking the return value and displaying the error message appropriately. Add a pause or prompt before returning to the menu so users can see the result.",
+            "status": "done",
+            "testStrategy": "Test each operation path with various number combinations. Verify output formatting and division by zero handling."
+          },
+          {
+            "id": 5,
+            "title": "Add main function and program entry point",
+            "description": "Create the main() function to orchestrate the program flow and add proper script execution handling",
+            "dependencies": [
+              4
+            ],
+            "details": "Implement the main() function that contains the primary program loop. Add a welcome message at program start and a goodbye message when exiting. Include the if __name__ == '__main__': pattern to ensure the calculator only runs when executed directly. Consider adding error handling at the top level to catch any unexpected errors gracefully. Format the overall user experience with clear spacing and prompts.",
+            "status": "done",
+            "testStrategy": "Run the complete program end-to-end, testing full workflows including multiple operations and proper exit behavior."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Create a simple TODO list application with add, remove, and list functionality",
+        "description": "Develop a Python-based TODO list application that allows users to add new tasks, remove completed or unwanted items, and display all current TODO items through an interactive command-line interface.",
+        "details": "Create a TODO list application with the following features:\n\n1. **Data Structure**: Use a Python list to store TODO items, where each item is a dictionary containing:\n   - 'id': Unique identifier for the task\n   - 'task': The task description\n   - 'created_at': Timestamp when the task was added\n\n2. **Core Functions**:\n   - `add_todo(task_description)`: Add a new TODO item with auto-generated ID\n   - `remove_todo(task_id)`: Remove a TODO item by its ID\n   - `list_todos()`: Display all current TODO items in a formatted list\n   - `save_todos()`: Save TODO list to a JSON file for persistence\n   - `load_todos()`: Load TODO list from JSON file on startup\n\n3. **User Interface**:\n   - Create an interactive menu system with options:\n     1. Add new TODO\n     2. Remove TODO\n     3. List all TODOs\n     4. Exit\n   - Clear console output for better readability\n   - Display confirmation messages for add/remove operations\n\n4. **Implementation approach**:\n   - Create a main todo_app.py file\n   - Implement data persistence using JSON file storage\n   - Add input validation and error handling\n   - Include proper formatting for TODO list display (numbered list with timestamps)\n\n5. **Example code structure**:\n```python\nimport json\nimport datetime\nimport os\n\nclass TodoApp:\n    def __init__(self):\n        self.todos = []\n        self.load_todos()\n    \n    def add_todo(self, task):\n        # Implementation here\n        pass\n    \n    def remove_todo(self, task_id):\n        # Implementation here\n        pass\n    \n    def list_todos(self):\n        # Implementation here\n        pass\n```",
+        "testStrategy": "1. **Add TODO Functionality**:\n   - Test adding a single TODO item and verify it appears in the list\n   - Add multiple TODO items and confirm they're stored with unique IDs\n   - Test adding TODOs with special characters and long descriptions\n   - Verify timestamps are correctly assigned to each TODO\n\n2. **Remove TODO Functionality**:\n   - Add 3 TODOs, then remove the middle one and verify correct deletion\n   - Test removing with invalid ID and verify appropriate error message\n   - Remove all TODOs and verify empty list handling\n   - Test removing from an already empty list\n\n3. **List TODO Functionality**:\n   - Verify empty list displays appropriate message\n   - Test list display with 1, 5, and 10+ items\n   - Confirm formatting is consistent and readable\n   - Verify TODO items display with correct ID, task description, and timestamp\n\n4. **Data Persistence**:\n   - Add TODOs, exit app, restart and verify TODOs are loaded\n   - Test with corrupted JSON file and verify error handling\n   - Delete JSON file and verify app creates new one\n\n5. **User Interface**:\n   - Test each menu option (1-4) responds correctly\n   - Test invalid menu inputs (letters, numbers > 4, negative numbers)\n   - Verify exit option properly saves and closes application\n   - Test rapid add/remove operations for stability",
+        "status": "done",
+        "dependencies": [
+          1
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up project structure and TodoApp class foundation",
+            "description": "Create the initial project structure with todo_app.py file and implement the TodoApp class constructor with basic initialization including the todos list and file loading mechanism",
+            "dependencies": [],
+            "details": "Create todo_app.py file and implement the TodoApp class with __init__ method that initializes an empty todos list and calls load_todos(). Set up the basic imports (json, datetime, os) and define the class structure. Implement a basic file path constant for the JSON storage file (e.g., 'todos.json')",
+            "status": "done",
+            "testStrategy": "Verify the class can be instantiated without errors and that the todos list is properly initialized as an empty list when no JSON file exists"
+          },
+          {
+            "id": 2,
+            "title": "Implement data persistence with save_todos() and load_todos() methods",
+            "description": "Create methods to save TODO items to a JSON file and load them on application startup, handling file operations and JSON serialization/deserialization",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement save_todos() to write the todos list to a JSON file with proper error handling. Implement load_todos() to read from the JSON file if it exists, with exception handling for file not found and JSON decode errors. Ensure datetime objects are properly serialized/deserialized using ISO format strings",
+            "status": "done",
+            "testStrategy": "Test saving and loading with empty list, single item, and multiple items. Verify persistence across application restarts and proper handling of missing or corrupted JSON files"
+          },
+          {
+            "id": 3,
+            "title": "Implement core TODO operations: add_todo() and remove_todo()",
+            "description": "Create methods to add new TODO items with auto-generated IDs and timestamps, and remove items by ID with proper validation",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement add_todo(task_description) that creates a new TODO dictionary with unique ID (based on current max ID + 1), task description, and current timestamp. Implement remove_todo(task_id) that finds and removes the TODO item with matching ID. Both methods should call save_todos() after modification and return success/failure status",
+            "status": "done",
+            "testStrategy": "Test adding multiple TODOs and verify unique IDs are generated. Test removing existing and non-existing IDs. Verify the list is properly updated and saved after each operation"
+          },
+          {
+            "id": 4,
+            "title": "Create list_todos() method and display formatting",
+            "description": "Implement the method to display all TODO items in a formatted, user-friendly list with proper numbering, task descriptions, and timestamps",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement list_todos() to display all current TODO items. Format output with item number, ID, task description, and creation timestamp in a readable format. Handle empty list case with appropriate message. Use string formatting to align columns and make the output visually appealing. Consider using datetime formatting for human-readable timestamps",
+            "status": "done",
+            "testStrategy": "Test display with empty list, single item, and multiple items. Verify formatting is consistent and readable. Test with long task descriptions to ensure proper text wrapping or truncation"
+          },
+          {
+            "id": 5,
+            "title": "Build interactive CLI menu system and main application loop",
+            "description": "Create the main application loop with an interactive menu system that allows users to select operations, handles user input, and provides a clean interface",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Implement main() function with a while loop that displays menu options (1. Add TODO, 2. Remove TODO, 3. List TODOs, 4. Exit). Handle user input with validation and error handling for invalid choices. Implement clear_screen() function using os.system() for cross-platform console clearing. Add confirmation messages for operations and handle edge cases like removing from empty list. Create if __name__ == '__main__' block to run the application",
+            "status": "done",
+            "testStrategy": "Test all menu options with valid and invalid inputs. Verify proper error handling and user feedback. Test the complete user flow from adding, listing, removing TODOs, and exiting the application"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Run ESLint check on front project and fix discovered issues",
+        "description": "Execute ESLint linting tool on the front-end project to identify code quality issues, style violations, and potential bugs, then systematically fix all discovered problems to ensure code consistency and maintainability.",
+        "details": "Perform a comprehensive ESLint analysis on the front-end project and resolve all identified issues:\n\n1. **Initial ESLint Setup Verification**:\n   - Check if ESLint is installed in the project (`npm list eslint` or check package.json)\n   - Verify .eslintrc configuration file exists and is properly configured\n   - Ensure necessary ESLint plugins are installed for the project's framework (React, Vue, etc.)\n\n2. **Run ESLint Analysis**:\n   - Execute `npm run lint` or `npx eslint .` to scan the entire front-end project\n   - Generate a detailed report of all linting errors and warnings\n   - Categorize issues by severity (errors vs warnings) and type\n\n3. **Fix Auto-fixable Issues**:\n   - Run `npx eslint . --fix` to automatically fix formatting and simple rule violations\n   - Review the changes made by auto-fix to ensure they're appropriate\n   - Commit auto-fixed changes separately for clear version history\n\n4. **Manual Issue Resolution**:\n   - Address remaining errors that require manual intervention\n   - Common issues to fix:\n     - Unused variables and imports\n     - Missing or incorrect prop types/TypeScript types\n     - Inconsistent naming conventions\n     - Missing semicolons or trailing commas\n     - Improper indentation or spacing\n     - Console.log statements in production code\n     - Accessibility violations (if using eslint-plugin-jsx-a11y)\n\n5. **Code Quality Improvements**:\n   - Refactor complex functions flagged by complexity rules\n   - Add missing JSDoc comments where required\n   - Ensure consistent code style across all files\n   - Update deprecated syntax or methods\n\n6. **Configuration Adjustments**:\n   - If certain rules are too strict or inappropriate, discuss with team before modifying .eslintrc\n   - Document any rule exceptions with clear comments\n   - Consider adding project-specific rules for consistency",
+        "testStrategy": "1. **Verify Clean ESLint Run**:\n   - Execute `npm run lint` or `npx eslint .` and confirm zero errors and warnings\n   - Run ESLint with `--max-warnings 0` flag to ensure even warnings are addressed\n   - Check that the command exits with code 0 (success)\n\n2. **Test Auto-fix Functionality**:\n   - Temporarily introduce a formatting issue (e.g., remove a semicolon)\n   - Run `npx eslint . --fix` and verify it corrects the issue\n   - Ensure auto-fix doesn't break any functionality\n\n3. **Validate Code Changes**:\n   - Run the application to ensure all fixes maintain functionality\n   - Execute existing test suite to confirm no regressions\n   - Perform manual testing of key features affected by the fixes\n\n4. **Review Specific File Types**:\n   - Check JavaScript/TypeScript files for proper syntax\n   - Verify JSX/TSX files follow React best practices (if applicable)\n   - Ensure configuration files (webpack, etc.) pass linting\n\n5. **CI/CD Integration Check**:\n   - If ESLint is part of CI pipeline, ensure all checks pass\n   - Verify pre-commit hooks (if any) work correctly with the fixes\n   - Confirm that the build process completes successfully\n\n6. **Code Review Verification**:\n   - Use `git diff` to review all changes made during the fixing process\n   - Ensure no unintended changes were introduced\n   - Verify that code readability has improved post-fixes",
+        "status": "done",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Verify ESLint installation and configuration",
+            "description": "Check if ESLint is properly installed in the front-end project and verify that the configuration file exists with appropriate settings",
+            "dependencies": [],
+            "details": "Run npm list eslint to check installation status, examine package.json for ESLint dependencies, verify .eslintrc.js/.eslintrc.json/.eslintrc.yml exists and contains valid configuration. Check for framework-specific plugins (eslint-plugin-react, eslint-plugin-vue, etc.) and ensure they match the project's tech stack. Document any missing dependencies or configuration issues.",
+            "status": "done",
+            "testStrategy": "Verify ESLint runs without configuration errors by executing npx eslint --version and npx eslint . --dry-run"
+          },
+          {
+            "id": 2,
+            "title": "Execute ESLint analysis and generate comprehensive report",
+            "description": "Run ESLint on the entire front-end codebase to identify all code quality issues, style violations, and potential bugs",
+            "dependencies": [
+              1
+            ],
+            "details": "Execute npm run lint or npx eslint . --format=json --output-file=eslint-report.json to scan all JavaScript/TypeScript files. Parse the JSON output to categorize issues by: severity (error vs warning), rule violated, file location, and frequency. Create a summary report showing total errors/warnings, most common violations, and files with the most issues. Save both raw and summarized reports for reference.",
+            "status": "done",
+            "testStrategy": "Verify report generation by checking output file exists and contains valid JSON with expected structure"
+          },
+          {
+            "id": 3,
+            "title": "Apply automatic fixes for formatting and simple violations",
+            "description": "Use ESLint's auto-fix capability to automatically resolve formatting issues and straightforward rule violations",
+            "dependencies": [
+              2
+            ],
+            "details": "Run npx eslint . --fix to automatically correct issues like: missing semicolons, inconsistent quotes, trailing commas, indentation problems, unused imports (with appropriate plugin), and simple spacing issues. Review git diff to examine all changes made by auto-fix. Create a separate commit with message 'chore: auto-fix ESLint formatting issues' to maintain clear version history. Re-run ESLint to generate updated issue count.",
+            "status": "done",
+            "testStrategy": "Compare before/after ESLint report to verify reduction in total issues and ensure no functional code changes"
+          },
+          {
+            "id": 4,
+            "title": "Manually resolve complex ESLint violations",
+            "description": "Address remaining ESLint errors and warnings that require manual code changes and cannot be automatically fixed",
+            "dependencies": [
+              3
+            ],
+            "details": "Systematically fix issues including: unused variables (remove or implement usage), missing prop-types or TypeScript type definitions, console.log statements (remove or replace with proper logging), accessibility violations in JSX, complex conditional expressions needing refactoring, missing return statements, unreachable code, and deprecated API usage. Group fixes by type and create logical commits. For each fix, ensure the change doesn't break existing functionality.",
+            "status": "done",
+            "testStrategy": "Run unit tests after each group of fixes to ensure no regressions, verify ESLint passes for modified files"
+          },
+          {
+            "id": 5,
+            "title": "Finalize code quality and update ESLint configuration if needed",
+            "description": "Perform final quality checks, refactor complex code sections, and adjust ESLint rules if necessary based on team agreement",
+            "dependencies": [
+              4
+            ],
+            "details": "Run final ESLint check to ensure zero errors remain. For any warnings that cannot be reasonably fixed, evaluate if the rule should be adjusted in .eslintrc. Document any rule modifications with comments explaining the rationale. Add inline eslint-disable comments only as last resort with justification. Update project documentation to reflect any new coding standards. Consider adding pre-commit hooks to prevent future violations.",
+            "status": "done",
+            "testStrategy": "Execute full test suite, run npx eslint . with zero exit code, verify build process completes successfully"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Create a configuration management system for orchestrator_config.json",
+        "description": "Develop a configuration management system that automatically discovers config files from the current directory hierarchy and provides an init command to generate configuration templates for new projects",
+        "details": "Build a comprehensive configuration management system with the following features:\n\n1. **Config Discovery Engine**:\n   - Implement recursive directory traversal to find all orchestrator_config.json files\n   - Support pattern matching for various config file formats (.json, .yaml, .yml, .toml)\n   - Create a ConfigDiscovery class with methods:\n     - `scan_directory(path, patterns=['*config.json', '*.config.yaml'])`: Recursively scan for config files\n     - `parse_config_file(filepath)`: Parse and validate discovered config files\n     - `get_config_hierarchy()`: Return nested structure of discovered configs\n\n2. **Configuration Schema Validation**:\n   - Define a JSON schema for orchestrator_config.json\n   - Implement validation using jsonschema library\n   - Support custom validation rules for specific config sections\n   - Provide clear error messages for invalid configurations\n\n3. **Init Command Implementation**:\n   - Create `config init` command that generates a new orchestrator_config.json\n   - Support interactive mode with prompts for key configuration values\n   - Offer preset templates (minimal, standard, advanced)\n   - Generate config with sensible defaults and helpful comments\n   - Example command: `python config_manager.py init --template=standard --interactive`\n\n4. **Configuration Merger**:\n   - Implement logic to merge multiple config files based on hierarchy\n   - Support environment-specific overrides (dev, staging, prod)\n   - Define precedence rules (CLI args > env vars > local config > global config)\n   - Create `merge_configs(base_config, override_config)` function\n\n5. **Config File Structure**:\n   ```json\n   {\n     \"version\": \"1.0\",\n     \"orchestrator\": {\n       \"name\": \"project-orchestrator\",\n       \"workers\": 4,\n       \"timeout\": 300\n     },\n     \"services\": {\n       \"database\": {\n         \"host\": \"localhost\",\n         \"port\": 5432\n       }\n     },\n     \"logging\": {\n       \"level\": \"INFO\",\n       \"format\": \"json\"\n     }\n   }\n   ```\n\n6. **API Interface**:\n   - `ConfigManager.load(path=None)`: Load config from path or discover automatically\n   - `ConfigManager.get(key, default=None)`: Get config value with dot notation\n   - `ConfigManager.set(key, value)`: Set config value\n   - `ConfigManager.save(path)`: Save current config to file\n   - `ConfigManager.validate()`: Validate current configuration",
+        "testStrategy": "1. **Config Discovery Tests**:\n   - Create test directory structure with multiple config files at different levels\n   - Verify scan_directory finds all config files matching patterns\n   - Test with symlinks and circular directory references\n   - Confirm proper handling of permission-denied directories\n   - Test discovery with .gitignore-style exclusion patterns\n\n2. **Init Command Tests**:\n   - Run `config init` and verify it creates valid orchestrator_config.json\n   - Test interactive mode with mock user inputs\n   - Verify different templates generate appropriate configs\n   - Test init command in directory with existing config (should prompt for overwrite)\n   - Confirm generated configs pass schema validation\n\n3. **Config Validation Tests**:\n   - Test with valid config files and confirm successful validation\n   - Test with invalid configs (missing required fields, wrong types, invalid values)\n   - Verify detailed error messages for validation failures\n   - Test custom validation rules (e.g., port ranges, URL formats)\n\n4. **Config Merger Tests**:\n   - Create base config and override configs, test merge results\n   - Verify deep merging of nested objects\n   - Test array handling (append vs replace strategies)\n   - Confirm environment variable substitution works correctly\n   - Test precedence rules with multiple config sources\n\n5. **API Integration Tests**:\n   - Test get() method with dot notation (e.g., 'services.database.host')\n   - Verify set() method updates config and maintains structure\n   - Test save() creates properly formatted JSON files\n   - Confirm load() handles missing files gracefully\n   - Test thread-safety of ConfigManager operations",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design and implement the ConfigDiscovery class with directory traversal",
+            "description": "Create a ConfigDiscovery class that recursively scans directories for configuration files matching specified patterns",
+            "dependencies": [],
+            "details": "Implement the ConfigDiscovery class with the following methods:\n- `scan_directory(path, patterns=['*config.json', '*.config.yaml'])`: Use os.walk() or pathlib to recursively traverse directories\n- `parse_config_file(filepath)`: Parse JSON, YAML, and TOML files using appropriate libraries (json, yaml, toml)\n- `get_config_hierarchy()`: Build and return a tree structure representing the discovered configs and their locations\n- Handle file access errors gracefully and log discovered files\n- Support glob patterns for flexible file matching",
+            "status": "done",
+            "testStrategy": "Write unit tests for directory traversal with mock file systems, test pattern matching with various file extensions, verify correct parsing of different config formats, test error handling for inaccessible files"
+          },
+          {
+            "id": 2,
+            "title": "Implement configuration schema validation with JSON Schema",
+            "description": "Create a validation system using jsonschema library to validate orchestrator_config.json files against a defined schema",
+            "dependencies": [],
+            "details": "Define a comprehensive JSON schema for orchestrator_config.json that includes:\n- Required fields (version, orchestrator section)\n- Type constraints for all fields\n- Pattern validation for string fields (e.g., version format)\n- Range validation for numeric fields (e.g., workers > 0, timeout > 0)\n- Custom validation functions for complex rules\n- Implement validation wrapper that provides clear, actionable error messages\n- Create schema versioning support for backward compatibility",
+            "status": "done",
+            "testStrategy": "Test validation with valid and invalid config files, verify error messages are clear and helpful, test edge cases like missing required fields, invalid types, and out-of-range values"
+          },
+          {
+            "id": 3,
+            "title": "Build the init command with interactive configuration generation",
+            "description": "Develop a command-line interface for generating new orchestrator_config.json files with templates and interactive prompts",
+            "dependencies": [
+              2
+            ],
+            "details": "Create `config init` command implementation:\n- Use argparse or click for CLI interface\n- Implement three template presets: minimal (basic required fields), standard (common options), advanced (all features)\n- Build interactive mode using input() or questionary library for better UX\n- Generate configs with inline comments explaining each section\n- Validate generated config against schema before saving\n- Support flags: --template, --interactive, --output-path\n- Add dry-run mode to preview generated config",
+            "status": "done",
+            "testStrategy": "Test CLI command parsing, verify template generation produces valid configs, test interactive prompts with mock inputs, ensure generated configs pass schema validation"
+          },
+          {
+            "id": 4,
+            "title": "Develop configuration merger with hierarchy and precedence rules",
+            "description": "Implement logic to merge multiple configuration files based on defined precedence rules and support environment-specific overrides",
+            "dependencies": [
+              1
+            ],
+            "details": "Create configuration merger functionality:\n- Implement `merge_configs(base_config, override_config)` using deep merge logic\n- Define precedence order: CLI args > environment variables > local config > global config\n- Support environment-specific files (config.dev.json, config.prod.json)\n- Handle conflicts intelligently (arrays: replace vs append, objects: deep merge)\n- Create helper to resolve config values from multiple sources\n- Implement dot notation path resolution (e.g., 'orchestrator.workers')\n- Log merge operations for debugging",
+            "status": "done",
+            "testStrategy": "Test deep merge with nested objects and arrays, verify precedence rules work correctly, test environment-specific overrides, test conflict resolution strategies"
+          },
+          {
+            "id": 5,
+            "title": "Create ConfigManager API with comprehensive interface methods",
+            "description": "Build the main ConfigManager class that provides a clean API for loading, accessing, modifying, and saving configurations",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Implement ConfigManager class with full API:\n- `load(path=None)`: Auto-discover or load from specific path, apply merging logic\n- `get(key, default=None)`: Support dot notation (e.g., 'services.database.host')\n- `set(key, value)`: Update config values with validation\n- `save(path)`: Serialize and save current config with proper formatting\n- `validate()`: Run schema validation on current configuration\n- `reload()`: Refresh configuration from disk\n- `to_dict()`: Export current config as dictionary\n- Implement singleton pattern for global access\n- Add context manager support for temporary config changes",
+            "status": "done",
+            "testStrategy": "Test all API methods with various inputs, verify dot notation works correctly, test save/load cycle preserves data, test validation integration, verify singleton behavior"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Enhance Claude orchestrator with improved documentation, real-time review, and keep-alive monitoring",
+        "description": "Upgrade the Claude orchestrator with enhanced --help documentation, implement immediate task review by Opus with diff management for Sonnet changes, and add --keep-alive option for continuous Task Master monitoring with intelligent worker pool management.",
+        "details": "Implement three major enhancements to the Claude orchestrator system:\n\n1. **Enhanced Help Documentation**:\n   - Extend the --help output in claude_orchestrator.py to include all available commands\n   - Add detailed descriptions for each command with usage examples\n   - Include options and flags for each command (e.g., --force, --verbose, --dry-run)\n   - Add a quick start section with common workflows\n   - Implement subcommand help (e.g., `orchestrator.py run --help`)\n\n2. **Immediate Task Review System**:\n   - Create a review mechanism that triggers when a Sonnet worker completes a task\n   - Implement a DiffManager class to capture and format changes:\n     - `capture_initial_state()`: Record file states before worker execution\n     - `generate_diff()`: Create unified diffs of all modified files\n     - `format_review_report()`: Generate a structured report for Opus\n   - Modify the worker completion callback to:\n     - Capture the diff of changes made by Sonnet\n     - Send the diff and task output to Opus for immediate review\n     - Store Opus's review feedback in Task Master\n   - Add review status indicators in the progress display\n\n3. **Keep-Alive Mode with Continuous Monitoring**:\n   - Add `--keep-alive` command-line option to claude_orchestrator.py\n   - Implement a monitoring loop that:\n     - Polls Task Master for new 'pending' tasks every 30 seconds (configurable)\n     - Maintains a worker pool managed by Opus\n     - Dynamically adjusts worker count based on task queue size\n   - Create an OpusPoolManager class:\n     - `assess_workload()`: Analyze pending tasks and dependencies\n     - `allocate_workers()`: Decide optimal worker distribution\n     - `monitor_progress()`: Track worker efficiency and adjust strategy\n   - Add graceful shutdown handling (SIGINT/SIGTERM) to safely stop workers\n   - Implement task dependency resolution for intelligent task ordering\n   - Add system resource monitoring to prevent overload\n\n4. **Integration Points**:\n   - Update orchestrator_config.json schema to support new settings:\n     - `keep_alive_interval`: Polling interval in seconds\n     - `review_enabled`: Toggle for immediate review feature\n     - `max_idle_time`: Time before reducing worker pool\n   - Ensure all new features integrate with existing Slack notifications\n   - Maintain backward compatibility with existing commands",
+        "testStrategy": "1. **Help Documentation Testing**:\n   - Run `python claude_orchestrator.py --help` and verify all commands are listed\n   - Test each subcommand help (e.g., `python claude_orchestrator.py run --help`)\n   - Verify examples are accurate and runnable\n   - Check that new users can understand and use the tool from help alone\n\n2. **Immediate Review System Testing**:\n   - Create a test task that modifies multiple files\n   - Run the orchestrator and verify:\n     - Initial file states are captured before worker execution\n     - Diffs are generated correctly showing all changes\n     - Opus receives and reviews the changes\n     - Review feedback is stored in Task Master\n   - Test with tasks that create new files, modify existing files, and delete files\n   - Verify diff format is readable and includes context\n\n3. **Keep-Alive Mode Testing**:\n   - Start orchestrator with `--keep-alive` option\n   - Add new tasks to Task Master while orchestrator is running\n   - Verify:\n     - New tasks are detected within the polling interval\n     - Opus correctly assigns tasks to available workers\n     - Worker pool scales up/down based on workload\n     - Dependencies are respected in task execution order\n   - Test graceful shutdown with Ctrl+C while tasks are running\n   - Monitor system resources during extended run\n   - Test with various task loads (single task, burst of tasks, continuous stream)\n\n4. **Integration Testing**:\n   - Run all existing commands to ensure no regression\n   - Test new features with Slack notifications enabled\n   - Verify configuration file changes are backward compatible\n   - Test with different worker configurations (1 worker, 5 workers, 10 workers)\n   - Simulate worker failures and verify recovery behavior",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Enhanced Help Documentation System",
+            "description": "Extend the --help output in claude_orchestrator.py with comprehensive command documentation, usage examples, and subcommand help functionality",
+            "dependencies": [],
+            "details": "Create a HelpFormatter class that generates detailed help text for all commands (run, add, parse, check, status). Include usage examples, available flags (--force, --verbose, --dry-run), quick start guide, and implement subcommand-specific help (e.g., 'orchestrator.py run --help'). Update the argument parser to use the new help system.",
+            "status": "done",
+            "testStrategy": "Test each command's help output, verify subcommand help works correctly, and ensure all flags and options are documented with examples"
+          },
+          {
+            "id": 2,
+            "title": "Create DiffManager Class for Change Tracking",
+            "description": "Implement a DiffManager class that captures file states before and after Sonnet worker execution, generating unified diffs for review",
+            "dependencies": [],
+            "details": "Develop DiffManager with methods: capture_initial_state() to record file checksums and content before execution, generate_diff() to create unified diffs using difflib, format_review_report() to structure changes for Opus review. Include file creation/deletion tracking, binary file handling, and efficient storage of file states.",
+            "status": "done",
+            "testStrategy": "Test diff generation with various file modifications, verify accurate capture of new/deleted files, and validate report formatting"
+          },
+          {
+            "id": 3,
+            "title": "Implement Immediate Task Review System",
+            "description": "Create a review mechanism that sends Sonnet worker changes to Opus for immediate review after task completion",
+            "dependencies": [
+              2
+            ],
+            "details": "Modify worker completion callback to integrate DiffManager, capture all changes made by Sonnet, send diff and task output to Opus manager for review, store review feedback in Task Master with new 'review' field. Add review status indicators to progress display and handle review-based task retries if needed.",
+            "status": "done",
+            "testStrategy": "Test end-to-end review flow, verify Opus receives correct diff data, ensure review feedback is properly stored in Task Master"
+          },
+          {
+            "id": 4,
+            "title": "Develop OpusPoolManager for Dynamic Worker Management",
+            "description": "Create OpusPoolManager class to intelligently manage worker allocation based on task queue analysis and system resources",
+            "dependencies": [],
+            "details": "Implement OpusPoolManager with assess_workload() to analyze pending tasks and dependencies, allocate_workers() to determine optimal worker count and distribution, monitor_progress() to track efficiency and adjust strategy. Include resource monitoring (CPU, memory), task dependency graph analysis, and worker performance metrics.",
+            "status": "done",
+            "testStrategy": "Test worker allocation algorithms, verify resource monitoring accuracy, and validate dynamic scaling behavior under various load conditions"
+          },
+          {
+            "id": 5,
+            "title": "Implement Keep-Alive Mode with Continuous Monitoring",
+            "description": "Add --keep-alive command option that enables continuous Task Master polling and dynamic worker pool management",
+            "dependencies": [
+              4
+            ],
+            "details": "Add --keep-alive CLI option, implement monitoring loop polling Task Master every 30 seconds (configurable), integrate OpusPoolManager for dynamic worker scaling, add graceful shutdown handling (SIGINT/SIGTERM), update orchestrator_config.json with new settings (keep_alive_interval, review_enabled, max_idle_time). Ensure integration with existing Slack notifications and maintain backward compatibility.",
+            "status": "done",
+            "testStrategy": "Test continuous monitoring behavior, verify graceful shutdown, validate configuration loading, and ensure proper task discovery and execution in keep-alive mode"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Implement a comprehensive testing framework for the Claude Orchestrator system",
+        "description": "Create a robust testing framework for the Claude Orchestrator system that includes unit tests, integration tests, and end-to-end tests to ensure reliability and maintainability of all orchestrator components.",
+        "details": "Build a comprehensive testing framework for the Claude Orchestrator system with the following components:\n\n1. **Testing Infrastructure Setup**:\n   - Install and configure pytest as the primary testing framework\n   - Set up pytest-cov for code coverage reporting\n   - Configure pytest-mock for mocking external dependencies\n   - Create a tests/ directory structure with subdirectories for unit, integration, and e2e tests\n   - Add test configuration files (pytest.ini, .coveragerc)\n\n2. **Unit Tests for Core Components**:\n   - Test claude_orchestrator.py main functions and command parsing\n   - Test task_master.py including task distribution and worker management\n   - Test configuration loading and validation from orchestrator_config.json\n   - Test error handling and edge cases for all major functions\n   - Implement fixtures for common test data and mock objects\n\n3. **Integration Tests**:\n   - Test the interaction between Task Master and Worker processes\n   - Verify proper task queue management and result collection\n   - Test configuration discovery and loading from multiple sources\n   - Validate the review process between Opus and Sonnet models\n   - Test keep-alive monitoring functionality\n\n4. **End-to-End Tests**:\n   - Create test scenarios that simulate real orchestrator workflows\n   - Test complete task execution from initialization to completion\n   - Verify proper handling of multiple concurrent tasks\n   - Test failure scenarios and recovery mechanisms\n   - Validate output formats and logging behavior\n\n5. **Mock Services and Test Utilities**:\n   - Create mock Claude API responses for testing without real API calls\n   - Implement test helpers for common operations\n   - Build factories for generating test data\n   - Create utilities for capturing and asserting on log output\n\n6. **Continuous Integration Setup**:\n   - Create test runner scripts for different test suites\n   - Add pre-commit hooks for running tests before commits\n   - Configure GitHub Actions or similar CI for automated testing\n   - Set up coverage thresholds and reporting",
+        "testStrategy": "1. **Verify Testing Framework Installation**:\n   - Run `pytest --version` to confirm pytest is installed\n   - Execute `pytest --cov` to verify coverage plugin works\n   - Check that all test dependencies are in requirements-test.txt\n\n2. **Unit Test Validation**:\n   - Run `pytest tests/unit/` and ensure all unit tests pass\n   - Verify at least 80% code coverage for core modules\n   - Check that each public function has at least one test\n   - Confirm edge cases and error conditions are tested\n\n3. **Integration Test Execution**:\n   - Run `pytest tests/integration/` with all tests passing\n   - Verify tests properly mock external dependencies\n   - Check that task distribution tests cover multiple worker scenarios\n   - Ensure configuration discovery tests work with various file structures\n\n4. **End-to-End Test Verification**:\n   - Execute `pytest tests/e2e/` and confirm realistic scenarios pass\n   - Verify tests complete within reasonable time limits\n   - Check that failure injection tests properly validate error handling\n   - Ensure all major orchestrator commands have e2e coverage\n\n5. **Coverage and Quality Metrics**:\n   - Run `pytest --cov=. --cov-report=html` and review coverage report\n   - Achieve minimum 80% overall code coverage\n   - Ensure no critical paths have less than 90% coverage\n   - Verify all error handling code is covered by tests\n\n6. **CI/CD Integration**:\n   - Push code and verify CI pipeline runs all tests automatically\n   - Confirm test results are reported in pull requests\n   - Check that failing tests block merges appropriately\n   - Verify coverage reports are generated and accessible",
+        "status": "pending",
+        "dependencies": [
+          5,
+          6,
+          "4"
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up testing infrastructure and configuration",
+            "description": "Install and configure pytest framework with coverage reporting and create the base test directory structure",
+            "dependencies": [],
+            "details": "Install pytest, pytest-cov, and pytest-mock packages. Create tests/ directory with subdirectories for unit/, integration/, and e2e/ tests. Configure pytest.ini with test discovery patterns, coverage settings, and test markers. Set up .coveragerc to exclude non-testable files and define coverage thresholds. Create conftest.py files for shared fixtures and test configuration.",
+            "status": "pending",
+            "testStrategy": "Verify the testing setup by creating a simple smoke test that validates pytest is properly configured and can discover tests across all subdirectories"
+          },
+          {
+            "id": 2,
+            "title": "Implement unit tests for core orchestrator components",
+            "description": "Create comprehensive unit tests for claude_orchestrator.py, task_master.py, and configuration modules",
+            "dependencies": [
+              1
+            ],
+            "details": "Write unit tests for claude_orchestrator.py covering main() function, command-line argument parsing, and initialization logic. Test task_master.py including TaskMaster class methods, worker process management, task distribution algorithms, and result collection. Create tests for configuration loading from orchestrator_config.json with validation of all configuration parameters. Implement error handling tests for invalid inputs, missing files, and API failures. Use pytest fixtures for common test data and mock objects.",
+            "status": "pending",
+            "testStrategy": "Use pytest-mock to isolate each component and mock external dependencies like Claude API calls. Aim for minimum 80% code coverage on core modules"
+          },
+          {
+            "id": 3,
+            "title": "Develop integration tests for component interactions",
+            "description": "Test the interactions between Task Master, Worker processes, and configuration systems",
+            "dependencies": [
+              2
+            ],
+            "details": "Create integration tests that verify Task Master can properly spawn and communicate with Worker processes using multiprocessing queues. Test task distribution across multiple workers and result aggregation. Validate configuration discovery from multiple sources (files, environment variables, command-line args) and proper precedence. Test the review workflow between Opus (reviewer) and Sonnet (implementer) models including feedback loops. Verify keep-alive monitoring detects and handles worker failures correctly.",
+            "status": "pending",
+            "testStrategy": "Use real multiprocessing components but mock the Claude API calls. Create test scenarios with varying numbers of workers and task complexities"
+          },
+          {
+            "id": 4,
+            "title": "Create end-to-end tests and failure scenarios",
+            "description": "Implement comprehensive E2E tests that simulate real orchestrator workflows and test failure recovery",
+            "dependencies": [
+              3
+            ],
+            "details": "Design E2E test scenarios that execute complete orchestrator workflows from task initialization through completion. Test concurrent task execution with multiple workers processing different task types simultaneously. Implement failure scenario tests including worker crashes, API timeouts, invalid task data, and resource exhaustion. Verify recovery mechanisms like task redistribution and graceful degradation. Validate output formats, logging behavior, and result persistence. Test the complete lifecycle of task creation, distribution, execution, review, and completion.",
+            "status": "pending",
+            "testStrategy": "Create a test harness that can simulate various failure conditions and verify the system's resilience and recovery capabilities"
+          },
+          {
+            "id": 5,
+            "title": "Build mock services and CI/CD integration",
+            "description": "Create mock Claude API services, test utilities, and integrate testing into the development workflow",
+            "dependencies": [
+              4
+            ],
+            "details": "Implement a mock Claude API service that returns configurable responses for different model calls (Opus, Sonnet, Haiku). Create test data factories for generating tasks, configurations, and expected results. Build helper utilities for capturing and asserting on log output, process states, and file outputs. Develop test runner scripts for executing different test suites (unit, integration, E2E). Set up pre-commit hooks to run tests and linting before commits. Configure GitHub Actions workflow for automated testing on pull requests with coverage reporting and test result summaries.",
+            "status": "pending",
+            "testStrategy": "Use the mock services in a separate test environment to ensure tests are deterministic and don't consume API credits"
+          },
+          {
+            "id": 6,
+            "title": "Set up GitHub Actions CI/CD pipeline",
+            "description": "Configure GitHub Actions for automated testing and deployment",
+            "details": "<info added on 2025-07-03T11:54:30.333Z>\nSet up branch protection rules to ensure code quality and prevent direct pushes to main branches. Configure automated security scanning using Dependabot to monitor dependencies for known vulnerabilities and automatically create pull requests for security updates. Integrate these security measures into the CI/CD pipeline to ensure all code changes pass security checks before merging.\n</info added on 2025-07-03T11:54:30.333Z>",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 7
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-03T11:54:47.990Z",
+      "updated": "2025-07-03T11:54:47.990Z",
+      "description": "=Testing environment tasks"
     }
   }
 }

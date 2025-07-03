@@ -1,0 +1,38 @@
+# Claude Orchestrator Requirements
+# Core dependencies
+requests>=2.32.0
+colorama>=0.4.6
+termcolor>=2.3.0
+tqdm>=4.66.0
+python-dotenv>=1.0.0
+
+# AI and Claude integration
+anthropic>=0.34.0  # For direct API access if needed
+
+# Async support
+asyncio>=3.4.3
+aiohttp>=3.9.0
+
+# Data handling
+pyyaml>=6.0
+jsonschema>=4.20.0
+
+# Testing framework
+pytest>=8.0.0
+pytest-cov>=5.0.0
+pytest-mock>=3.14.0
+pytest-asyncio>=0.23.0
+
+# Code quality
+black>=24.0.0
+flake8>=7.0.0
+mypy>=1.8.0
+
+# Documentation
+sphinx>=7.2.0
+sphinx-rtd-theme>=2.0.0
+
+# Utilities
+click>=8.1.0  # For CLI enhancements
+rich>=13.7.0  # For better terminal output
+blessed>=1.20.0  # For terminal UI

@@ -380,6 +380,8 @@ class WorkerTask:
     result: Optional[str] = None
     error: Optional[str] = None
     status_message: Optional[str] = None
+    priority: str = "medium"
+    subtask_count: int = 0
     
     def __post_init__(self):
         if self.dependencies is None:
@@ -624,18 +626,76 @@ class TaskMasterInterface:
         self._subtask_cache[task_id] = (time.time(), result)
         return result
     
-    def add_task(self, title: str, description: str, **kwargs) -> Optional[Dict[str, Any]]:
+    def get_pending_tasks_with_deps_met(self) -> List[Dict[str, Any]]:
+        """Get all pending tasks with dependencies met"""
+        tasks = []
+        for task in self.task_manager.get_all_tasks():
+            if task.status == "pending":
+                # Check if dependencies are met
+                deps_met = True
+                for dep_id in task.dependencies:
+                    dep_task = self.task_manager.get_task(str(dep_id))
+                    if dep_task and dep_task.status != "done":
+                        deps_met = False
+                        break
+                
+                if deps_met:
+                    tasks.append({
+                        'id': str(task.id),
+                        'title': task.title,
+                        'description': task.description,
+                        'priority': task.priority,
+                        'subtask_count': len(task.subtasks) if hasattr(task, 'subtasks') else 0
+                    })
+        
+        # Sort by priority
+        priority_order = {"high": 3, "medium": 2, "low": 1}
+        tasks.sort(key=lambda t: (-priority_order.get(t['priority'], 2), int(t['id'])))
+        return tasks
+    
+    def expand_task_with_ai(self, task_id: str, num_subtasks: int = 5, use_research: bool = False) -> List[Dict[str, Any]]:
+        """Expand a task into subtasks using AI"""
+        subtasks = self.task_ai.expand_task(task_id, num_subtasks, use_research)
+        return [{
+            'id': f"{task_id}.{st.id}",
+            'title': st.title,
+            'description': st.description,
+            'status': st.status
+        } for st in subtasks]
+    
+    def parse_prd_to_tasks(self, prd_content: str) -> List[Dict[str, Any]]:
+        """Parse PRD content and create tasks"""
+        tasks = self.task_ai.parse_prd(prd_content, auto_add=True)
+        return [{
+            'id': str(task.id),
+            'title': task.title,
+            'description': task.description,
+            'priority': task.priority,
+            'dependencies': task.dependencies
+        } for task in tasks]
+    
+    def perform_ai_research(self, query: str, task_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+        """Perform AI-powered research"""
+        return self.task_ai.perform_research(query, task_ids)
+    
+    def add_task(self, title: str, description: str, priority: str = "medium") -> Dict[str, Any]:
         """Add a new task"""
-        task = self.task_manager.add_task(title, description, **kwargs)
-        if task:
-            return {
-                'id': str(task.id),
-                'title': task.title,
-                'description': task.description,
-                'status': task.status,
-                'priority': task.priority
-            }
-        return None
+        task = self.task_manager.add_task(title, description, priority=priority)
+        return {
+            'id': str(task.id),
+            'title': task.title,
+            'description': task.description,
+            'priority': task.priority
+        }
+    
+    def get_task_dependencies(self, task_id: str) -> List[Dict[str, Any]]:
+        """Get all tasks that depend on the given task"""
+        dependent_tasks = self.task_manager.get_task_dependencies(task_id)
+        return [{
+            'id': str(task.id),
+            'title': task.title,
+            'status': task.status
+        } for task in dependent_tasks]
     
     def expand_task(self, task_id: str, num_subtasks: int = 5, use_research: bool = False) -> List[Dict[str, Any]]:
         """Expand a task into subtasks using AI"""
@@ -679,40 +739,59 @@ class OpusManager:
         sys.stdout.write("⏳ Fetching tasks from Task Master...")
         sys.stdout.flush()
         
-        # Get all tasks from Task Master
-        all_tasks = self.task_master.list_tasks()
+        # Get tasks with dependencies met using enhanced method
+        ready_tasks = self.task_master.get_pending_tasks_with_deps_met()
         
         sys.stdout.write("\r✅ Fetched tasks from Task Master" + " " * 20 + "\n")
         sys.stdout.flush()
         
-        if not all_tasks:
-            logger.warning("No tasks found in Task Master")
+        if not ready_tasks:
+            # Check if there are blocked tasks
+            all_pending = self.task_master.list_tasks(status='pending')
+            if all_pending:
+                logger.warning(f"Found {len(all_pending)} pending tasks but all have unmet dependencies")
+                # Show blocked tasks
+                print("\n🔒 Blocked tasks:")
+                for task in all_pending[:5]:  # Show first 5
+                    deps = task.get('dependencies', [])
+                    if deps:
+                        print(f"   - Task {task['id']}: {task['title']} (waiting for: {deps})")
+            else:
+                logger.warning("No tasks found in Task Master")
             return []
         
         # Convert Task Master tasks to WorkerTasks
-        sys.stdout.write("🔍 Analyzing task dependencies and priorities...")
+        sys.stdout.write("🔍 Analyzing task priorities and subtasks...")
         sys.stdout.flush()
         
         worker_tasks = []
-        for task in all_tasks:
-            if task.get('status') in ['pending', 'in-progress']:
-                worker_task = WorkerTask(
-                    task_id=task.get('id', ''),
-                    title=task.get('title', ''),
-                    description=task.get('description', ''),
-                    details=task.get('details'),
-                    dependencies=[str(d) for d in task.get('dependencies', [])]
-                )
-                worker_tasks.append(worker_task)
+        for task in ready_tasks:
+            worker_task = WorkerTask(
+                task_id=task.get('id', ''),
+                title=task.get('title', ''),
+                description=task.get('description', ''),
+                details=task.get('details'),
+                dependencies=[],  # Already filtered for met dependencies
+                priority=task.get('priority', 'medium'),
+                subtask_count=task.get('subtask_count', 0)
+            )
+            worker_tasks.append(worker_task)
         
         sys.stdout.write(f"\r✅ Found {len(worker_tasks)} tasks ready for processing" + " " * 30 + "\n")
+        
+        # Show task summary
+        high_priority = sum(1 for t in worker_tasks if t.priority == 'high')
+        with_subtasks = sum(1 for t in worker_tasks if t.subtask_count > 0)
+        
+        if high_priority > 0:
+            print(f"   🔴 High priority: {high_priority} tasks")
+        if with_subtasks > 0:
+            print(f"   📋 With subtasks: {with_subtasks} tasks")
+        
         sys.stdout.flush()
         
-        # Sort tasks by dependencies and priority
-        sorted_tasks = self._sort_tasks_by_dependencies(worker_tasks)
-        
-        logger.info(f"Opus Manager: Prepared {len(sorted_tasks)} tasks for parallel execution")
-        return sorted_tasks
+        logger.info(f"Opus Manager: Prepared {len(worker_tasks)} tasks for parallel execution")
+        return worker_tasks
     
     def _sort_tasks_by_dependencies(self, tasks: List[WorkerTask]) -> List[WorkerTask]:
         """Sort tasks ensuring dependencies come first"""
@@ -1227,19 +1306,54 @@ class ClaudeOrchestrator:
         else:
             logger.info(f"Worker {worker.worker_id} stopped")
     
-    def run(self):
-        """Run the orchestrator"""
+    def run(self, keep_alive: bool = False, check_interval: int = 60):
+        """Run the orchestrator
+        
+        Args:
+            keep_alive: If True, continuously monitor for new tasks
+            check_interval: Seconds between task checks in keep-alive mode
+        """
         self.start_time = time.time()
         logger.info("\n" + "="*50)
         logger.info("Starting Claude Orchestrator")
+        if keep_alive:
+            logger.info("Keep-alive mode: Will monitor for new tasks")
         logger.info("="*50 + "\n")
         
-        # Step 1: Analyze and plan with Opus
-        tasks = self.manager.analyze_and_plan()
-        
-        if not tasks:
-            logger.warning("No tasks to process!")
-            return
+        # Main orchestration loop
+        while True:
+            # Step 1: Analyze and plan with Opus
+            tasks = self.manager.analyze_and_plan()
+            
+            if not tasks:
+                if keep_alive:
+                    logger.info(f"No tasks found. Checking again in {check_interval} seconds...")
+                    try:
+                        time.sleep(check_interval)
+                        continue
+                    except KeyboardInterrupt:
+                        logger.info("\nKeep-alive mode interrupted by user")
+                        break
+                else:
+                    logger.warning("No tasks to process!")
+                    return
+            
+            # Process the tasks
+            self._process_task_batch(tasks)
+            
+            if not keep_alive:
+                break
+            
+            # In keep-alive mode, wait before checking for new tasks
+            logger.info(f"\n✅ Batch complete. Checking for new tasks in {check_interval} seconds...")
+            try:
+                time.sleep(check_interval)
+            except KeyboardInterrupt:
+                logger.info("\nKeep-alive mode interrupted by user")
+                break
+    
+    def _process_task_batch(self, tasks: List[WorkerTask]):
+        """Process a batch of tasks"""
         
         # Initialize workers based on task count
         self._initialize_workers(len(tasks))
@@ -1721,30 +1835,45 @@ First provide your review summary, then create any necessary follow-up tasks."""
     def _opus_review_task(self, task: WorkerTask) -> Dict[str, Any]:
         """Have Opus review a single completed task"""
         try:
-            # Create review prompt
+            # Get task details including any changes made
+            task_detail = self.manager.task_master.get_task(task.task_id)
+            
+            # Create review prompt with context
             prompt = f"""As the Opus Manager, please review this completed task:
 
 Task ID: {task.task_id}
 Title: {task.title}
 Description: {task.description}
+Priority: {task.priority}
+{f"Details: {task.details}" if task.details else ""}
 
 Worker Output:
 {task.result[:2000] if task.result else "No output"}
 
-Please:
-1. Assess if the task was completed successfully
-2. Check if the implementation follows best practices
-3. Identify any potential issues or improvements
+Review Guidelines:
+1. Assess if the task was completed successfully and meets the requirements
+2. Check if the implementation follows best practices and coding standards
+3. Identify any potential issues, bugs, or improvements needed
+4. Verify that tests were added/updated if applicable
 
-If improvements are needed:
-- Use task-master CLI to create specific follow-up tasks
-- Be clear about what needs to be fixed or improved
-- Set appropriate priorities
+IMPORTANT: Do NOT use CLI commands. Instead, provide a structured JSON response:
+{
+  "review_passed": true/false,
+  "summary": "Brief summary of the review",
+  "issues": [
+    {"severity": "high/medium/low", "description": "Issue description"}
+  ],
+  "follow_up_tasks": [
+    {
+      "title": "Task title",
+      "description": "Detailed description",
+      "priority": "high/medium/low",
+      "details": "Implementation details"
+    }
+  ]
+}
 
-Based on your review, create any necessary follow-up tasks using:
-- task-master add-task --prompt="[specific improvement]" --priority=[high/medium/low]
-
-Provide your review summary."""
+Provide your review in the JSON format above."""
 
             # Execute Opus review
             with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
@@ -1784,13 +1913,44 @@ Provide your review summary."""
             if result.returncode == 0:
                 opus_output = result.stdout
                 
-                # Count follow-up tasks created
-                follow_up_count = self._count_follow_up_tasks(opus_output)
+                # Parse JSON response and create follow-up tasks
+                follow_up_count = 0
+                review_data = None
+                
+                try:
+                    # Extract JSON from the output
+                    import re
+                    json_match = re.search(r'\{.*\}', opus_output, re.DOTALL)
+                    if json_match:
+                        review_data = json.loads(json_match.group())
+                        
+                        # Create follow-up tasks if any
+                        for task_data in review_data.get('follow_up_tasks', []):
+                            new_task = self.manager.task_master.add_task(
+                                title=task_data['title'],
+                                description=task_data['description'],
+                                priority=task_data.get('priority', 'medium')
+                            )
+                            if new_task:
+                                follow_up_count += 1
+                                logger.info(f"Created follow-up task {new_task['id']}: {new_task['title']}")
+                        
+                        # Update original task status based on review
+                        if review_data.get('review_passed', False):
+                            task.status_message = "✅ Passed review"
+                        else:
+                            task.status_message = f"⚠️ Review found {len(review_data.get('issues', []))} issues"
+                            
+                except json.JSONDecodeError:
+                    logger.warning("Could not parse JSON from Opus review, using text analysis")
+                    # Fallback to counting mentions
+                    follow_up_count = self._count_follow_up_tasks(opus_output)
                 
                 return {
                     'success': True,
                     'review': opus_output,
-                    'follow_up_count': follow_up_count
+                    'follow_up_count': follow_up_count,
+                    'review_data': review_data
                 }
             else:
                 return {
@@ -2003,6 +2163,12 @@ Examples:
   # Run the orchestrator
   python claude_orchestrator.py run
   
+  # Run in keep-alive mode (monitors for new tasks)
+  python claude_orchestrator.py run --keep-alive
+  
+  # Keep-alive with custom check interval
+  python claude_orchestrator.py run --keep-alive --check-interval=30
+  
   # Add a new task via Opus
   python claude_orchestrator.py add "Create a REST API with authentication"
   
@@ -2032,6 +2198,12 @@ Examples:
     
     parser.add_argument('--working-dir', '-d',
                        help='Set working directory for task execution')
+    
+    parser.add_argument('--keep-alive', '-k', action='store_true',
+                       help='Keep running and monitor for new tasks')
+    
+    parser.add_argument('--check-interval', '-i', type=int, default=60,
+                       help='Seconds between task checks in keep-alive mode (default: 60)')
     
     # Add command specific arguments
     parser.add_argument('description', nargs='?',
@@ -2193,7 +2365,11 @@ Examples:
         
         try:
             orchestrator = ClaudeOrchestrator(config, working_dir)
-            orchestrator.run()
+            # Pass keep-alive settings from command line
+            orchestrator.run(
+                keep_alive=args.keep_alive,
+                check_interval=args.check_interval
+            )
         finally:
             # Restore original directory if changed
             if working_dir:
