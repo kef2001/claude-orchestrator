@@ -15,7 +15,7 @@
     "manager_timeout": 7200,
     "task_queue_timeout": 1.0,
     "max_turns": null,
-    "default_working_dir": "/Users/mediquitous/workspace/claude_automation2",
+    "default_working_dir": null,
     "bash_default_timeout_ms": 36000000,
     "bash_max_timeout_ms": 72000000,
     "bash_max_output_length": 30000,
